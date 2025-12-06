@@ -13,6 +13,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
+# ----------------------------------------------------------------------
+# Modifications by Abdelrahman Faqieh, 2025
+# - Refactored `main()` to separate argument parsing and training logic
+# - Added `run_training(args)` for programmatic access
+# - Updated `parse_args()` to accept custom argument lists
+# ----------------------------------------------------------------------
 """Fine-tuning script for Stable Diffusion for text2image with support for LoRA."""
 
 import argparse
@@ -144,7 +151,7 @@ def log_validation(
     return images
 
 
-def parse_args():
+def parse_args(input_args=None):
     parser = argparse.ArgumentParser(description="Simple example of a training script.")
     parser.add_argument(
         "--pretrained_model_name_or_path",
@@ -428,7 +435,7 @@ def parse_args():
         help="The image interpolation method to use for resizing images.",
     )
 
-    args = parser.parse_args()
+    args = parser.parse_args(input_args)
     env_local_rank = int(os.environ.get("LOCAL_RANK", -1))
     if env_local_rank != -1 and env_local_rank != args.local_rank:
         args.local_rank = env_local_rank
@@ -445,8 +452,7 @@ DATASET_NAME_MAPPING = {
 }
 
 
-def main():
-    args = parse_args()
+def run_training(args):
     if args.report_to == "wandb" and args.hub_token is not None:
         raise ValueError(
             "You cannot use both --report_to=wandb and --hub_token due to a security risk of exposing your token."
@@ -986,6 +992,9 @@ def main():
 
     accelerator.end_training()
 
+def main():
+    args = parse_args()
+    run_training(args)
 
 if __name__ == "__main__":
     main()
