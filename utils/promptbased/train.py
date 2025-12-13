@@ -3,6 +3,7 @@ from diffusers import AutoPipelineForText2Image
 from .train_text_to_image_lora import parse_args, run_training
 import torch
 import json
+import shutil
 
 device = (
     'cuda' if torch.cuda.is_available() else

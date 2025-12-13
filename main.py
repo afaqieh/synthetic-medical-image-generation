@@ -1,6 +1,6 @@
 import argparse
 import utils.promptbased.Results as PBResults
-import utils.promptbased.FineTune as PB
+import utils.promptbased.train as PB
 from utils.preprocessing import preprocess
 from utils.DisplayImage import display_image
 from utils.promptbased.PromptBuilder import prompt_engineering
@@ -24,7 +24,7 @@ def main():
     parser.add_argument('--guidance_scale', type=int, default=7.5, help='guidance scale for prompt generation')
     parser.add_argument('--analyze_results', action="store_true", help="analyze embeddings of the generated images")
     parser.add_argument('--generated_directory', default='./results/', help='path to generated image directory')
-    
+    parser.add_argument('--simulate_queuing', action='store_true', help='simulate generation of images to calculate average time')
     
     args = parser.parse_args()
     
@@ -51,6 +51,9 @@ def main():
         if args.type == 'Prompt-Based':
             if not args.LoRA_weights:
                 parser.error(f"When --mode=load_pretrained, you must specify LoRA weights path")
+            if args.simulate_queuing:
+                times = PBResults.sample_finetuned(args.prompt, args.LoRA_weights, args.num_inf_steps, args.guidance_scale, generate=200)
+                
             image_base = PBResults.sample_base(args.prompt, args.num_inf_steps, args.guidance_scale)
             image_finetuned = PBResults.sample_finetuned(args.prompt, args.LoRA_weights, args.num_inf_steps, args.guidance_scale)
             PBResults.display_results(image_base, image_finetuned)
