@@ -93,10 +93,11 @@ def save_sample(unet, vae, cond_encoder, output_dir, device, step):
         if hasattr(module, "attn2"):
             module.attn2.metadata_context = cond
 
-    scheduler = DDPMScheduler(num_train_timesteps=1000)
+    model_name = "runwayml/stable-diffusion-v1-5"  # o pásalo como argumento
+    scheduler = DDPMScheduler.from_pretrained(model_name, subfolder="scheduler")
     scheduler.set_timesteps(70)
 
-    latents = torch.randn(1, 4, 16, 16, device=device)
+    latents = torch.randn(1, 4, 64, 64, device=device)
 
     with torch.no_grad():
         for t in scheduler.timesteps:
@@ -123,8 +124,9 @@ def save_all_classes(unet, vae, cond_encoder, output_dir, device, step):
     folder = os.path.join(output_dir, "samples_by_class", f"step_{step}")
     os.makedirs(folder, exist_ok=True)
 
-    scheduler = DDPMScheduler(num_train_timesteps=1000)
-    scheduler.set_timesteps(30)
+    model_name = "runwayml/stable-diffusion-v1-5"
+    scheduler = DDPMScheduler.from_pretrained(model_name, subfolder="scheduler")
+    scheduler.set_timesteps(70)
 
     for cls in range(num_classes):
 
@@ -142,7 +144,7 @@ def save_all_classes(unet, vae, cond_encoder, output_dir, device, step):
             if hasattr(module, "attn2"):
                 module.attn2.metadata_context = cond
 
-        latents = torch.randn(1, 4, 16, 16, device=device)
+        latents = torch.randn(1, 4, 64, 64, device=device)
 
         with torch.no_grad():
             for t in scheduler.timesteps:
@@ -165,8 +167,8 @@ def save_all_classes(unet, vae, cond_encoder, output_dir, device, step):
 # adapters and the metadata encoder while keeping the base UNet and VAE frozen.
 
 def train(
-    csv="data/HAM10000_metadata.csv",
-    img_dir="data/HAM10000_images",
+    csv="../data/HAM10000_metadata.csv",
+    img_dir="../data/HAM10000_images",
     outdir="lora_numeric_full",
     batch_size=4,
     lr=3e-5,

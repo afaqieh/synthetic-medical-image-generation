@@ -8,7 +8,7 @@ from torch.utils.data import Dataset
 import torchvision.transforms as T
 from diffusers import AutoencoderKL, DDPMScheduler
 
-# Prepare HAM10000 dataset for SD-style LoRA training at 128x128
+# Prepare HAM10000 dataset for SD-style LoRA training at 512x512
 
 class HAM10000Dataset(Dataset):
 
@@ -28,11 +28,9 @@ class HAM10000Dataset(Dataset):
         self.img_dir = img_dir
         self.vae = vae
         self.device = device
-
-        # Image preprocessing: resize to 128x128 and normalize to [-1,1] range
         
         self.transform = T.Compose([
-            T.Resize((128, 128)),
+            T.Resize((512, 512)),
             T.ToTensor(),
             T.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
         ])
@@ -65,6 +63,9 @@ class HAM10000Dataset(Dataset):
             latents = self.vae.encode(img).latent_dist.sample()  
             latents = 0.18215 * latents
             latents = latents.detach()                           
+        
+        assert img.shape[-2:] == (512, 512)
+        assert latents.shape[-2:] == (64, 64)
 
         latents = latents.squeeze(0)                             
 
